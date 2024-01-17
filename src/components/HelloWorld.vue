@@ -3,7 +3,7 @@
     <v-responsive class="align-center text-center fill-height">
       <v-img height="300" src="@/assets/logo.svg" />
 
-      <h1 class="text-h2 font-weight-bold">Hello World</h1>
+      <h1 class="text-h2 font-weight-bold">Hello Askabek</h1>
 
       <div class="py-14" />
     </v-responsive>
