@@ -49,7 +49,8 @@ export default {
         });
     },
     deleteUser(userId) {
-      console.log('Deleting user with ID:', userId);
+      UserService.delete(userId)
+        .then(this.retrieveUsers());
     },
   },
   mounted() {
