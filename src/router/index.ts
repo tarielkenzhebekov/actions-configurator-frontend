@@ -21,6 +21,21 @@ const routes =  [
     path: "/users",
     name: "users",
     component: () => import("@/views/users/index.vue")
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: () => import("@/views/login/index.vue")
+  },
+  {
+    path: '/edit-user/:userId',
+    name: 'edit-user',
+    component: () => import("@/views/users/components/EditUserForm.vue"),
+  },
+  {
+    path: '/add-user',
+    name: 'add-user',
+    component: () => import("@/views/users/components/AddUserForm.vue"),
   }
 ];
 

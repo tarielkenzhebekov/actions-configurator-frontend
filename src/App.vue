@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <Sidebar />
+    <div>
+      <Sidebar />
+    </div>
     <div class="content">
       <router-view />
     </div>
@@ -18,7 +20,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .content {
   margin-left: 20%;
   padding: 1rem;
