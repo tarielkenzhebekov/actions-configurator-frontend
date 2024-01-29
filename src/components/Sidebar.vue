@@ -24,7 +24,7 @@
       <v-icon>mdi-account-group</v-icon>
     </router-link>
     <div class="button-container">
-      <router-link to="/logout" class="logout-button" :class="{ 'selected': $route.path === '/logout' }">
+      <router-link @click="logOut" to="/login" class="logout-button" :class="{ 'selected': $route.path === '/login' }">
         <span v-if="!isClosed">Выйти</span>
         <v-icon>mdi-exit-to-app</v-icon>
       </router-link>
@@ -33,6 +33,7 @@
 </template>
 
 <script lang="ts">
+
 export default {
   name: 'Sidebar',
   data() {
@@ -44,6 +45,10 @@ export default {
     toggleSidebar() {
       this.isClosed = !this.isClosed;
     },
+    logOut() {
+      localStorage.clear();
+      this.$router.push({ name: 'login' });
+    }
   },
 };
 </script>
