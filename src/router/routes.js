@@ -1,6 +1,4 @@
-import { createWebHistory, createRouter } from "vue-router";
-
-const routes =  [
+const routes = [
   {
     path: "/",
     alias: "/actions",
@@ -37,11 +35,7 @@ const routes =  [
     name: 'add-user',
     component: () => import("@/views/users/components/AddUserForm.vue"),
   }
-];
+]
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
 
-export default router;
+export default routes
