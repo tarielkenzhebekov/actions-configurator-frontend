@@ -1,4 +1,5 @@
 import axios from "axios"
+import { useUserStore } from '@/stores/UserStore.js'
 
 
 const axiosInstance = axios.create({
@@ -10,10 +11,11 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem('user'))
+    const userStore = useUserStore()
 
-    if (user?.access_token) {
-      config.headers.Authorization = `Bearer ${user.access_token}`
+    if (userStore.isLoggedIn) {
+      console.log(`Bearer ${userStore.getAccessToken}`)
+      config.headers.Authorization = `Bearer ${userStore.getAccessToken}`
     }
 
     return config
