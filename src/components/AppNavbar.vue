@@ -12,16 +12,8 @@ import AppSidebar from './AppSidebar.vue'
         </v-avatar>
         Конфигуратор Акций
       </v-app-bar-title>
-      <v-btn icon>
-        <v-icon>
-          mdi-magnify
-        </v-icon>
-      </v-btn>
-      <v-btn icon>
-        <v-icon>
-          mdi-export
-        </v-icon>
-      </v-btn>
+      <v-btn icon="mdi-magnify"></v-btn>
+      <v-btn icon="mdi-export"></v-btn>
     </v-app-bar>
     
     <AppSidebar></AppSidebar>
