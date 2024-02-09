@@ -7,9 +7,11 @@ import AppSidebar from './AppSidebar.vue'
   <v-container>
     <v-app-bar>
       <v-app-bar-title>
-        <v-avatar :tile="true">
-          <img src="@/assets/logo.png" alt="logo">
-        </v-avatar>
+        <router-link to="/actions">
+          <v-avatar :tile="true">
+            <img src="@/assets/logo.png" alt="logo">
+          </v-avatar>
+        </router-link>
         Конфигуратор Акций
       </v-app-bar-title>
       <v-btn icon="mdi-magnify"></v-btn>
