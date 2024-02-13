@@ -9,7 +9,12 @@ const routes = [
     path: "/actions",
     name: "actions",
     component: () => import("@/views/ActionsView.vue")
-  }
+  },
+  {
+    path: "/statistics",
+    name: "statistics",
+    component: () => import("@/views/StatisticsView.vue")
+  },
 ]
 
 
