@@ -20,7 +20,7 @@
         <v-list-item prepend-icon="mdi-creation" title="Акции" value="action"></v-list-item>
         <v-list-item prepend-icon="mdi-account-multiple" title="Абоненты" value="subscriber"></v-list-item>
         <v-list-item prepend-icon="mdi-account" title="Пользователи" value="user"></v-list-item>
-        <v-list-item prepend-icon="mdi-chart-bar" title="Статистика" value="statistics"></v-list-item>
+        <v-list-item to="/statistics" prepend-icon="mdi-chart-bar" title="Статистика" value="statistics"></v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-container>
