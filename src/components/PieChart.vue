@@ -3,20 +3,19 @@ import { Pie } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { getChartLabelPlugin } from 'chart.js-plugin-labels-dv'
 
-const data = [2280, 732];
+const props = defineProps({
+  data: Object,
+  labels: Array,
+  colors: Array,
+  titleText: Array
+})
 
 const chartData = {
-  labels: [
-    'Билеты',
-    'Промокоды',
-  ],
+  labels: props.labels,
   datasets: [ {
-    data: data,
+    data: props.data,
     label: 'Доход в сомах',
-    backgroundColor: [
-      'rgb(252, 53, 95)',
-      'rgb(54, 162, 235)',
-    ],
+    backgroundColor: props.colors,
     hoverOffset: 8
   }
   ]
@@ -40,7 +39,7 @@ const chartOptions = {
     },
     title: {
       display: true,
-      text: 'Доход от билетов и промокодов за весь период (в сомах)',
+      text: props.titleText,
       position: 'bottom',
       font: {
         'size': 15
