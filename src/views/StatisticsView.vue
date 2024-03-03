@@ -8,6 +8,7 @@ import BarChart from '@/components/BarChart.vue';
 import StackedBarChart from '@/components/StackedBarChart.vue';
 import Stacked100BarChart from '@/components/Stacked100BarChart.vue';
 import HorizontalBarChart from '@/components/HorizontalBarChart.vue';
+import DoughnutChart from '@/components/DoughnutChart.vue';
 import StatisticsService from '@/services/StatisticsService.js';
 
 ChartJS.register(Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement);
@@ -75,6 +76,17 @@ onMounted( () => {
       </v-col>
       <v-col cols="6">
         <div id="chart2" class="chart-container"><BarChart /></div>
+      </v-col>
+      <v-col cols="6">
+        <div id="chart7" class="chart-container">
+          <DoughnutChart
+            v-if="loaded"
+            :data="totalAmount"
+            :labels="['Билеты', 'Промокоды']"
+            :colors="colors"
+            :title-text="['Общее количество билетов и промокодов,', 'выставленные на продажу']"
+          />
+        </div>
       </v-col>
     </v-row>
     <v-row>
