@@ -1,21 +1,22 @@
 <script setup>
-import { Chart as ChartJS, Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement } from 'chart.js'
-import { onMounted, reactive, ref } from 'vue'
+import { Chart as ChartJS, Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement } from 'chart.js';
+import { onMounted, ref } from 'vue';
 
-import AppNavbar from '@/components/AppNavbar.vue'
-import PieChart from '@/components/PieChart.vue'
-import BarChart from '@/components/BarChart.vue'
-import StackedBarChart from '@/components/StackedBarChart.vue'
-import Stacked100BarChart from '@/components/Stacked100BarChart.vue'
-import StatisticsService from '@/services/StatisticsService.js'
+import AppNavbar from '@/components/AppNavbar.vue';
+import PieChart from '@/components/PieChart.vue';
+import BarChart from '@/components/BarChart.vue';
+import StackedBarChart from '@/components/StackedBarChart.vue';
+import Stacked100BarChart from '@/components/Stacked100BarChart.vue';
+import HorizontalBarChart from '@/components/HorizontalBarChart.vue';
+import StatisticsService from '@/services/StatisticsService.js';
 
-ChartJS.register(Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement)
+ChartJS.register(Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement);
 
 const loaded = ref(false);
 
-const overallIncomePieChartData = ref([]);
+const overallIncome = ref([]);
 const activeAndNonActiveActions = ref([]);
-const activeAndNonActiveActions = ref([]);
+const totalAmount = ref([]);
 
 const colors = ['rgb(252, 53, 95)', 'rgb(54, 162, 235)']
 
@@ -24,8 +25,9 @@ onMounted( () => {
     StatisticsService.findAll()
       .then((data) => {
         console.log(data);
-        overallIncomePieChartData.value = [data.ticketsIncome, data.promocodesIncome];
+        overallIncome.value = [data.ticketsIncome, data.promocodesIncome];
         activeAndNonActiveActions.value = [data.activatedActionsAmount, data.actionsAmount - data.activatedActionsAmount];
+        totalAmount.value = [data.ticketsAmount, data.promocodesAmount];
         loaded.value = true;
       });
   } catch(err) {
@@ -42,7 +44,7 @@ onMounted( () => {
         <div id="chart1" class="chart-container">
           <PieChart
             v-if="loaded"
-            :data="overallIncomePieChartData"
+            :data="overallIncome"
             :labels="['Билеты', 'Промокоды']"
             :colors="colors"
             :title-text="['Доход от билетов и промокодов за весь период (в сомах)']"
@@ -62,10 +64,10 @@ onMounted( () => {
       </v-col>
       <v-col cols="6">
         <div id="chart6" class="chart-container">
-          <PieChart
+          <HorizontalBarChart
             v-if="loaded"
-            :data="activeAndNonActiveActions"
-            :labels="['Активные', 'Неактивные']"
+            :data="totalAmount"
+            :labels="['Билеты', 'Промокоды']"
             :colors="colors"
             :title-text="['Общее количество билетов и промокодов,', 'выставленные на продажу']"
           />
