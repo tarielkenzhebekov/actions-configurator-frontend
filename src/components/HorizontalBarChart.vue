@@ -3,10 +3,11 @@ import { Bar } from 'vue-chartjs';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 const props = defineProps({
-  data: Object,
+  data: Array,
   labels: Array,
   colors: Array,
-  titleText: Array
+  titleText: Array,
+  dataLabels: Array
 })
 
 const datasets = [];
@@ -22,10 +23,9 @@ for (let i = 0; i < props.data.length; i++) {
     };
     datasets.push(dataset);
 }
-const dataLabels = ['Общее'];
 
 const chartData = {
-  labels: dataLabels,
+  labels: props.dataLabels,
   datasets: datasets
 };
 
@@ -64,7 +64,7 @@ const chartPlugins = [ ChartDataLabels ];
 
 <template>
     <Bar
-      id="bar-chart-1"
+      id="bar-chart-4"
       :options="chartOptions"
       :data="chartData"
       :plugins="chartPlugins"

@@ -4,7 +4,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { getChartLabelPlugin } from 'chart.js-plugin-labels-dv'
 
 const props = defineProps({
-  data: Object,
+  data: Array,
   labels: Array,
   colors: Array,
   titleText: Array
@@ -14,7 +14,6 @@ const chartData = {
   labels: props.labels,
   datasets: [ {
     data: props.data,
-    label: 'Доход в сомах',
     backgroundColor: props.colors,
     hoverOffset: 8
   }

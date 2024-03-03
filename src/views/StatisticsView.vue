@@ -71,11 +71,20 @@ onMounted( () => {
             :labels="['Билеты', 'Промокоды']"
             :colors="colors"
             :title-text="['Общее количество билетов и промокодов,', 'выставленные на продажу']"
+            :data-labels="['Общее']"
           />
         </div>
       </v-col>
       <v-col cols="6">
-        <div id="chart2" class="chart-container"><BarChart /></div>
+        <div id="chart8" class="chart-container">
+          <BarChart
+            v-if="loaded"
+            :data="totalAmount"
+            :label="'Билеты'"
+            :colors="['rgb(252, 53, 95)']"
+            :title-text="['Bar chart для этапов,']"
+          />
+        </div>
       </v-col>
       <v-col cols="6">
         <div id="chart7" class="chart-container">
@@ -94,7 +103,15 @@ onMounted( () => {
         <div id="chart3" class="chart-container"><StackedBarChart /></div>
       </v-col>
       <v-col cols="6">
-        <div id="chart4" class="chart-container"><Stacked100BarChart /></div>
+        <div id="chart4" class="chart-container">
+          <Stacked100BarChart
+            :sold="[432, 919, 123]"
+            :remaining="[54, 500, 50]"
+            :labels="['Продано билетов', 'Остаток билетов']"
+            :colors="['rgb(252, 53, 95)', 'rgb(242, 182, 195)']"
+            :title-text="['Коэффициент конверсии для билетов', 'на каждом этапе']"
+          />
+        </div>
       </v-col>
     </v-row>
   </v-container>

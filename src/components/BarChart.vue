@@ -3,34 +3,29 @@ import { Bar } from 'vue-chartjs';
 
 import { getChartLabelPlugin } from 'chart.js-plugin-labels-dv'
 
-const DATA_COUNT = 3; // Get from API
-const dataLabels = [];
-const ticketValues = [252, 200, 261];
-const promocodeValues = [159, 390, 203];
+const props = defineProps({
+  data: Array,
+  label: String,
+  colors: Array,
+  titleText: Array
+})
 
-for (let i = 1; i <= DATA_COUNT; ++i) {
+const dataLabels = [];
+
+for (let i = 1; i <= props.data.length; ++i) {
   dataLabels.push('Этап ' + i);
 }
 
 const chartData = {
   labels: dataLabels,
-  datasets: [
-    {
-      label: 'Билеты',
-      data: ticketValues,
-      backgroundColor: 'rgb(252, 53, 95)',
-      borderColor: 'rgba(255, 255, 255)',
-      borderWidth: 1,
-      borderRadius: 10,
-    }, {
-      label: 'Промокоды',
-      data: promocodeValues,
-      backgroundColor: 'rgb(54, 162, 235)',
-      borderColor: 'rgba(255, 255, 255)',
-      borderWidth: 1,
-      borderRadius: 10,
-    }
-  ],
+  datasets: [{
+    label: props.label,
+    data: props.data,
+    backgroundColor: props.colors,
+    borderColor: 'rgba(255, 255, 255)',
+    borderWidth: 1,
+    borderRadius: 10,
+  }]
 };
 
 const chartOptions = {
@@ -45,7 +40,7 @@ const chartOptions = {
     },
     title: {
       display: true,
-      text: 'Количество проданных билетов и промокодов на каждом этапе',
+      text: props.titleText,
       position: 'bottom',
       font: {
         'size': 15
