@@ -40,6 +40,7 @@ const chartOptions = {
       display: true,
       text: props.titleText,
       position: 'bottom',
+      padding: 20,
       font: {
         'size': 15
       }
