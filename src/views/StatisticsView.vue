@@ -1,6 +1,6 @@
 <script setup>
 import { Chart as ChartJS, Tooltip, Legend, Title, ArcElement, CategoryScale, LinearScale, BarElement } from 'chart.js';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import AppNavbar from '@/components/AppNavbar.vue';
 import PieChart from '@/components/PieChart.vue';
@@ -9,9 +9,9 @@ import StackedBarChart from '@/components/StackedBarChart.vue';
 import Stacked100BarChart from '@/components/Stacked100BarChart.vue';
 import HorizontalBarChart from '@/components/HorizontalBarChart.vue';
 import DoughnutChart from '@/components/DoughnutChart.vue';
+import ChartCard from '@/components/ChartCard.vue';
 import StatisticsService from '@/services/StatisticsService.js';
-import ChartCard from '@/components/ChartCard.vue'
-import ActionsService from '@/services/ActionsService.js'
+import ActionsService from '@/services/ActionsService.js';
 
 const paddingPlugin = {
   id: 'customPaddingPlugin',
@@ -48,36 +48,71 @@ const ticketsUsed = ref([]);
 
 const colors = ['rgb(252, 53, 95)', 'rgb(54, 162, 235)']
 
-const actions = ref([])
-const select = ref({
-  id: '-1', name: 'Все'
-});
+const actions = ref([{
+  id: -1, name: 'Общая статистика'
+}])
+const select = ref(
+  actions.value[0]
+);
+
+const fetchOverallStats = () => {
+  loaded.value = false;
+  StatisticsService.findAll()
+    .then((data) => {
+      actionsAmount.value = data.actionsAmount;
+      totalIncome.value = data.totalIncome;
+      overallIncome.value = [data.ticketsIncome, data.promocodesIncome];
+      activeAndNonActiveActions.value = [data.activatedActionsAmount, data.actionsAmount - data.activatedActionsAmount];
+      totalAmount.value = [data.ticketsAmount, data.promocodesAmount];
+      promocodesSold.value = [data.promocodesSold, data.promocodesAmount - data.promocodesSold];
+      ticketsSold.value = [data.ticketsSold, data.ticketsAmount - data.ticketsSold];
+      promocodesUsed.value = [data.promocodesUsed, data.promocodesSold - data.promocodesUsed];
+      ticketsUsed.value = [data.ticketsUsed, data.ticketsSold - data.ticketsUsed];
+      loaded.value = true;
+    });
+}
+
+const fetchActionStats = async(id, type) => {
+  try {
+    StatisticsService.findById(id, type)
+      .then((response) =>
+        console.log(response.data)
+      );
+
+  } catch (err) {
+    console.log(err)
+  }
+}
 
 onMounted( () => {
   try {
-    StatisticsService.findAll()
-      .then((data) => {
-        console.log(data);
-        actionsAmount.value = data.actionsAmount;
-        totalIncome.value = data.totalIncome;
-        overallIncome.value = [data.ticketsIncome, data.promocodesIncome];
-        activeAndNonActiveActions.value = [data.activatedActionsAmount, data.actionsAmount - data.activatedActionsAmount];
-        totalAmount.value = [data.ticketsAmount, data.promocodesAmount];
-        promocodesSold.value = [data.promocodesSold, data.promocodesAmount - data.promocodesSold];
-        ticketsSold.value = [data.ticketsSold, data.ticketsAmount - data.ticketsSold];
-        promocodesUsed.value = [data.promocodesUsed, data.promocodesSold - data.promocodesUsed];
-        ticketsUsed.value = [data.ticketsUsed, data.ticketsSold - data.ticketsUsed];
-        loaded.value = true;
-      });
+    fetchOverallStats();
     ActionsService.findAll()
       .then(response => {
-        console.log(response)
-        actions.value = response
+        for (const element of response) {
+          actions.value.push(element);
+        }
       })
   } catch(err) {
     console.log(err);
   }
 })
+
+const fetchSelectedValue = () =>{
+  console.log('Select value: ');
+  console.log(select.value);
+  try {
+    if (select.value.id === -1) {
+      fetchOverallStats();
+    } else {
+      fetchActionStats(select.value.id, select.value.type);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+watch(select, fetchSelectedValue);
 </script>
 
 <template>

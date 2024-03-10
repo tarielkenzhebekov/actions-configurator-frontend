@@ -8,7 +8,7 @@ class StatisticsService {
       type: type
     }
 
-    return axios.get(`/statistics/action`, { params })
+    return axios.get(`/statistics/action`, { params });
   }
 
   async findAll() {
