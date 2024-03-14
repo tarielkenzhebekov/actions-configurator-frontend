@@ -2,13 +2,13 @@ import axios from "@/plugins/axios"
 
 class StatisticsService {
 
-  findById(id, type) {
+  async findById(id, type) {
     const params = {
       id: id,
       type: type
     }
 
-    return axios.get(`/statistics/action`, { params });
+    return await axios.get(`/statistics/action`, { params });
   }
 
   async findAll() {

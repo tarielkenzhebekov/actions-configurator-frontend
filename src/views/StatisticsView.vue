@@ -46,14 +46,33 @@ const ticketsSold = ref([]);
 const promocodesUsed = ref([]);
 const ticketsUsed = ref([]);
 
+const stagesAmount = ref([]);
+const stagesSold = ref([]);
+const stagesUsed = ref([])
+
+const actionAmount = ref();
+const actionSold = ref();
+const actionUsed = ref();
+
+const actionSoldPieChart = ref([]);
+const actionUsedPieChart = ref([]);
+
+const actionSoldImage = ref();
+const actionUsedImage = ref();
+
+const actionSoldCardTitle = ref()
+const actionUsedCardTitle = ref()
+
+const actionSoldPieChartTitle = ref();
+const actionUsedPieChartTitle = ref();
+
 const colors = ['rgb(252, 53, 95)', 'rgb(54, 162, 235)']
 
 const actions = ref([{
   id: -1, name: 'Общая статистика'
 }])
-const select = ref(
-  actions.value[0]
-);
+const select = ref();
+const overallSelected = ref(true);
 
 const fetchOverallStats = () => {
   loaded.value = false;
@@ -72,21 +91,78 @@ const fetchOverallStats = () => {
     });
 }
 
-const fetchActionStats = async(id, type) => {
-  try {
-    StatisticsService.findById(id, type)
-      .then((response) =>
-        console.log(response.data)
-      );
+const fetchActionStats = (id, type) => {
+  loaded.value = false;
+  StatisticsService.findById(id, type)
+    .then((response) => {
+      // TODO Remove
+        console.log(response.data);
 
+        stagesAmount.value = response.data.map((stage) => stage.amount);
+        stagesSold.value = response.data.map((stage) =>  stage.sold);
+        stagesUsed.value = response.data.map((stage) =>  stage.used);
+
+
+        actionAmount.value = stagesAmount.value.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0);
+        actionSold.value = stagesSold.value.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0);
+        actionUsed.value = stagesUsed.value.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0);
+
+        actionSoldPieChart.value = [actionSold.value, actionAmount.value - actionSold.value];
+        actionUsedPieChart.value = [actionUsed.value, actionSold.value - actionUsed.value];
+
+        if (type === 'TICKET') {
+          actionSoldImage.value = '/images/ticket.png';
+          actionUsedImage.value = '/images/ticket_used.png';
+          actionSoldCardTitle.value = 'Продано билетов';
+          actionUsedCardTitle.value = 'Использовано билетов';
+          actionSoldPieChartTitle.value = 'Проданные билеты и остаток';
+          actionUsedPieChartTitle.value = 'Использованные билеты и остаток';
+        } else {
+          actionSoldImage.value = '/images/promocode.png'
+          actionUsedImage.value = '/images/promocode_used.png'
+          actionSoldCardTitle.value = 'Продано промокодов';
+          actionUsedCardTitle.value = 'Использовано промокодов';
+          actionSoldPieChartTitle.value = 'Процент проданных промокодов';
+          actionUsedPieChartTitle.value = 'Использовано промокодов из проданных ';
+        }
+
+        loaded.value = true;
+      }
+    );
+}
+
+const fetchSelectedValue = () =>{
+  // TODO Remove
+  console.log('Select value: ');
+  console.log(select.value);
+
+  localStorage.setItem('select', JSON.stringify(select.value))
+
+  try {
+    if (select.value.id === -1) {
+      overallSelected.value = true;
+      fetchOverallStats();
+    } else {
+      overallSelected.value = false;
+      fetchActionStats(select.value.id, select.value.type);
+    }
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
 }
 
 onMounted( () => {
   try {
-    fetchOverallStats();
+    const localSelect = localStorage.getItem('select');
+    select.value = localSelect ? JSON.parse(localSelect) : actions.value[0];
+
+    fetchSelectedValue();
     ActionsService.findAll()
       .then(response => {
         for (const element of response) {
@@ -97,20 +173,6 @@ onMounted( () => {
     console.log(err);
   }
 })
-
-const fetchSelectedValue = () =>{
-  console.log('Select value: ');
-  console.log(select.value);
-  try {
-    if (select.value.id === -1) {
-      fetchOverallStats();
-    } else {
-      fetchActionStats(select.value.id, select.value.type);
-    }
-  } catch (err) {
-    console.log(err);
-  }
-}
 
 watch(select, fetchSelectedValue);
 </script>
@@ -132,7 +194,7 @@ watch(select, fetchSelectedValue);
             ></v-select>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row v-if="overallSelected">
         <v-col
           cols="3"
           lg="3"
@@ -140,6 +202,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/discount.png"
             title="Количество акций"
             :number="actionsAmount"
@@ -160,6 +223,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/income.png"
             title="Доход (в сомах)"
             :number="totalIncome"
@@ -180,6 +244,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/sale.png"
             title="Всего выставлено на продажу билетов и промокодов"
             :number="totalAmount[0] + totalAmount[1]"
@@ -203,6 +268,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/promocode.png"
             title="Продано промокодов"
             :number="promocodesSold[0]"
@@ -223,6 +289,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/ticket.png"
             title="Продано билетов"
             :number="ticketsSold[0]"
@@ -243,6 +310,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/promocode_used.png"
             title="Использовано промокодов"
             :number="promocodesUsed[0]"
@@ -263,6 +331,7 @@ watch(select, fetchSelectedValue);
           sm="12"
         >
           <ChartCard
+            v-if="loaded"
             img-url="/images/ticket_used.png"
             title="Использовано билетов"
             :number="ticketsUsed[0]"
@@ -279,7 +348,51 @@ watch(select, fetchSelectedValue);
       </v-row >
 
   <!--    Temporary Delimiter -->
-      <v-row>
+      <v-row v-else>
+        <v-col
+          cols="3"
+          lg="3"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            :img-url="actionSoldImage"
+            :title="actionSoldCardTitle"
+            :number="actionSold"
+          >
+            <PieChart
+              v-if="loaded"
+              :data="actionSoldPieChart"
+              :labels="['Продано', 'Остаток']"
+              :colors="colors"
+              :title-text="[actionSoldPieChartTitle]"
+            />
+          </ChartCard>
+        </v-col>
+        <v-col
+          cols="3"
+          lg="3"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            :img-url="actionUsedImage"
+            :title="actionUsedCardTitle"
+            :number="actionUsed"
+          >
+            <PieChart
+              v-if="loaded"
+              :data="actionUsedPieChart"
+              :labels="['Использовано', 'Остаток']"
+              :colors="colors"
+              :title-text="[actionUsedPieChartTitle]"
+            />
+          </ChartCard>
+        </v-col>
+
+
         <v-col cols="6">
           <div id="chart4" class="chart-container">
             <BarChart
@@ -294,6 +407,7 @@ watch(select, fetchSelectedValue);
         <v-col cols="6">
           <div id="chart6" class="chart-container">
             <Stacked100BarChart
+              v-if="loaded"
               :sold="[432, 919, 123]"
               :remaining="[54, 500, 50]"
               :labels="['Продано билетов', 'Остаток билетов']"
