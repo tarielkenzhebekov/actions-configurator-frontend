@@ -5,7 +5,6 @@ import { getChartLabelPlugin } from 'chart.js-plugin-labels-dv'
 
 const props = defineProps({
   data: Array,
-  label: String,
   colors: Array,
   titleText: Array
 })
@@ -19,7 +18,7 @@ for (let i = 1; i <= props.data.length; ++i) {
 const chartData = {
   labels: dataLabels,
   datasets: [{
-    label: props.label,
+    label: '',
     data: props.data,
     backgroundColor: props.colors,
     borderColor: 'rgba(255, 255, 255)',
@@ -47,7 +46,7 @@ const chartOptions = {
       }
     },
     legend: {
-      align: 'end'
+      display: false
     }
   },
   scales: {

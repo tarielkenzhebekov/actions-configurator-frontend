@@ -3,12 +3,11 @@ import { Chart as ChartJS, Tooltip, Legend, Title, ArcElement, CategoryScale, Li
 import { onMounted, ref, watch } from 'vue';
 
 import AppNavbar from '@/components/AppNavbar.vue';
-import PieChart from '@/components/PieChart.vue';
-import BarChart from '@/components/BarChart.vue';
-import StackedBarChart from '@/components/StackedBarChart.vue';
-import Stacked100BarChart from '@/components/Stacked100BarChart.vue';
-import HorizontalBarChart from '@/components/HorizontalBarChart.vue';
-import DoughnutChart from '@/components/DoughnutChart.vue';
+import PieChart from '@/components/charts/PieChart.vue';
+import BarChart from '@/components/charts/BarChart.vue';
+import Stacked100BarChart from '@/components/charts/Stacked100BarChart.vue';
+import HorizontalBarChart from '@/components/charts/HorizontalBarChart.vue';
+import DoughnutChart from '@/components/charts/DoughnutChart.vue';
 import ChartCard from '@/components/ChartCard.vue';
 import StatisticsService from '@/services/StatisticsService.js';
 import ActionsService from '@/services/ActionsService.js';
@@ -36,7 +35,7 @@ ChartJS.register(
 
 const loaded = ref(false);
 
-const actionsAmount = ref();
+const actionsCount = ref();
 const totalIncome = ref();
 const overallIncome = ref([]);
 const activeAndNonActiveActions = ref([]);
@@ -48,23 +47,33 @@ const ticketsUsed = ref([]);
 
 const stagesAmount = ref([]);
 const stagesSold = ref([]);
-const stagesUsed = ref([])
+const stagesNotSold = ref([]);
+const stagesUsed = ref([]);
+const stagesNotUsed = ref([]);
+const stagesIncome = ref([]);
 
 const actionAmount = ref();
 const actionSold = ref();
 const actionUsed = ref();
+const actionIncome = ref();
 
-const actionSoldPieChart = ref([]);
-const actionUsedPieChart = ref([]);
+const actionSoldPieChartData = ref([]);
+const actionUsedPieChartData = ref([]);
 
 const actionSoldImage = ref();
 const actionUsedImage = ref();
 
-const actionSoldCardTitle = ref()
-const actionUsedCardTitle = ref()
+const actionAmountCardTitle = ref();
+const actionSoldCardTitle = ref();
+const actionUsedCardTitle = ref();
+const actionIncomeCardTitle = ref();
 
+const actionAmountBarChartTitle = ref();
 const actionSoldPieChartTitle = ref();
 const actionUsedPieChartTitle = ref();
+const actionIncomeBarChartTitle = ref();
+const actionSoldStackedBarChartTitle = ref();
+const actionUsedStackedBarChartTitle = ref();
 
 const colors = ['rgb(252, 53, 95)', 'rgb(54, 162, 235)']
 
@@ -78,7 +87,7 @@ const fetchOverallStats = () => {
   loaded.value = false;
   StatisticsService.findAll()
     .then((data) => {
-      actionsAmount.value = data.actionsAmount;
+      actionsCount.value = data.actionsAmount;
       totalIncome.value = data.totalIncome;
       overallIncome.value = [data.ticketsIncome, data.promocodesIncome];
       activeAndNonActiveActions.value = [data.activatedActionsAmount, data.actionsAmount - data.activatedActionsAmount];
@@ -95,12 +104,12 @@ const fetchActionStats = (id, type) => {
   loaded.value = false;
   StatisticsService.findById(id, type)
     .then((response) => {
-      // TODO Remove
-        console.log(response.data);
-
         stagesAmount.value = response.data.map((stage) => stage.amount);
         stagesSold.value = response.data.map((stage) =>  stage.sold);
+        stagesNotSold.value = response.data.map((stage) =>  stage.amount - stage.sold);
         stagesUsed.value = response.data.map((stage) =>  stage.used);
+        stagesNotUsed.value = response.data.map((stage) =>  stage.sold - stage.used);
+        stagesIncome.value = response.data.map((stage) => stage.income);
 
 
         actionAmount.value = stagesAmount.value.reduce((accumulator, currentValue) => {
@@ -112,24 +121,39 @@ const fetchActionStats = (id, type) => {
         actionUsed.value = stagesUsed.value.reduce((accumulator, currentValue) => {
           return accumulator + currentValue
         }, 0);
+        actionIncome.value = stagesIncome.value.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue
+        }, 0);
 
-        actionSoldPieChart.value = [actionSold.value, actionAmount.value - actionSold.value];
-        actionUsedPieChart.value = [actionUsed.value, actionSold.value - actionUsed.value];
+        actionSoldPieChartData.value = [actionSold.value, actionAmount.value - actionSold.value];
+        actionUsedPieChartData.value = [actionUsed.value, actionSold.value - actionUsed.value];
 
         if (type === 'TICKET') {
           actionSoldImage.value = '/images/ticket.png';
           actionUsedImage.value = '/images/ticket_used.png';
-          actionSoldCardTitle.value = 'Продано билетов';
+          actionAmountCardTitle.value = 'Всего билетов выставлено на продажу';
+          actionSoldCardTitle.value = 'Всего продано билетов';
           actionUsedCardTitle.value = 'Использовано билетов';
-          actionSoldPieChartTitle.value = 'Проданные билеты и остаток';
-          actionUsedPieChartTitle.value = 'Использованные билеты и остаток';
+          actionIncomeCardTitle.value = 'Общая выручка от продажи билетов';
+          actionAmountBarChartTitle.value = 'Количество билетов выставленных на продажу на каждом этапе'
+          actionSoldPieChartTitle.value = 'Продано билетов';
+          actionUsedPieChartTitle.value = 'Использовано билетов из проданных';
+          actionIncomeBarChartTitle.value = 'Выручка от продажи билетов на каждом этапе';
+          actionSoldStackedBarChartTitle.value = 'Процент продажи билетов';
+          actionUsedStackedBarChartTitle.value = 'Процент использования проданных билетов';
         } else {
-          actionSoldImage.value = '/images/promocode.png'
-          actionUsedImage.value = '/images/promocode_used.png'
-          actionSoldCardTitle.value = 'Продано промокодов';
+          actionSoldImage.value = '/images/promocode.png';
+          actionUsedImage.value = '/images/promocode_used.png';
+          actionAmountCardTitle.value = 'Всего промокодов выставлено на продажу';
+          actionSoldCardTitle.value = 'Всего продано промокодов';
           actionUsedCardTitle.value = 'Использовано промокодов';
-          actionSoldPieChartTitle.value = 'Процент проданных промокодов';
-          actionUsedPieChartTitle.value = 'Использовано промокодов из проданных ';
+          actionIncomeCardTitle.value = 'Общая выручка от продажи промокодов';
+          actionAmountBarChartTitle.value = 'Количество промокодов выставленных на продажу на каждом этапе';
+          actionSoldPieChartTitle.value = 'Продано промокодов';
+          actionUsedPieChartTitle.value = 'Использовано промокодов из проданных';
+          actionIncomeBarChartTitle.value = 'Выручка от продажи промокодов на каждом этапе';
+          actionSoldStackedBarChartTitle.value = 'Процент продажи промокодов';
+          actionUsedStackedBarChartTitle.value = 'Процент использования проданных промокодов';
         }
 
         loaded.value = true;
@@ -138,10 +162,6 @@ const fetchActionStats = (id, type) => {
 }
 
 const fetchSelectedValue = () =>{
-  // TODO Remove
-  console.log('Select value: ');
-  console.log(select.value);
-
   localStorage.setItem('select', JSON.stringify(select.value))
 
   try {
@@ -205,7 +225,7 @@ watch(select, fetchSelectedValue);
             v-if="loaded"
             img-url="/images/discount.png"
             title="Количество акций"
-            :number="actionsAmount"
+            :number="actionsCount"
           >
             <PieChart
               v-if="loaded"
@@ -346,9 +366,29 @@ watch(select, fetchSelectedValue);
           </ChartCard>
         </v-col>
       </v-row >
-
-  <!--    Temporary Delimiter -->
       <v-row v-else>
+        <v-col
+          cols="6"
+          lg="6"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            img-url="/images/sale.png"
+            :title="actionAmountCardTitle"
+            :number="actionAmount"
+          >
+            <div id="chart4" class="chart-container">
+              <BarChart
+                v-if="loaded"
+                :data="stagesAmount"
+                :colors="['rgb(252, 53, 95)']"
+                :title-text="actionAmountBarChartTitle"
+              />
+            </div>
+          </ChartCard>
+        </v-col>
         <v-col
           cols="3"
           lg="3"
@@ -363,7 +403,7 @@ watch(select, fetchSelectedValue);
           >
             <PieChart
               v-if="loaded"
-              :data="actionSoldPieChart"
+              :data="actionSoldPieChartData"
               :labels="['Продано', 'Остаток']"
               :colors="colors"
               :title-text="[actionSoldPieChartTitle]"
@@ -384,40 +424,83 @@ watch(select, fetchSelectedValue);
           >
             <PieChart
               v-if="loaded"
-              :data="actionUsedPieChart"
+              :data="actionUsedPieChartData"
               :labels="['Использовано', 'Остаток']"
               :colors="colors"
               :title-text="[actionUsedPieChartTitle]"
             />
           </ChartCard>
         </v-col>
-
-
-        <v-col cols="6">
-          <div id="chart4" class="chart-container">
-            <BarChart
-              v-if="loaded"
-              :data="totalAmount"
-              :label="'Билеты'"
-              :colors="['rgb(252, 53, 95)']"
-              :title-text="['Bar chart для этапов']"
-            />
-          </div>
+        <v-col
+          cols="6"
+          lg="6"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            img-url="/images/income.png"
+            :title="actionIncomeCardTitle"
+            :number="actionIncome"
+          >
+            <div id="chart5" class="chart-container">
+              <BarChart
+                v-if="loaded"
+                :data="stagesIncome"
+                :label="'Билеты'"
+                :colors="['rgb(252, 53, 95)']"
+                :title-text="actionIncomeBarChartTitle"
+              />
+            </div>
+          </ChartCard>
         </v-col>
-        <v-col cols="6">
-          <div id="chart6" class="chart-container">
-            <Stacked100BarChart
-              v-if="loaded"
-              :sold="[432, 919, 123]"
-              :remaining="[54, 500, 50]"
-              :labels="['Продано билетов', 'Остаток билетов']"
-              :colors="['rgb(252, 53, 95)', 'rgb(242, 182, 195)']"
-              :title-text="['Коэффициент конверсии для билетов', 'на каждом этапе']"
-            />
-          </div>
+        <v-col
+          cols="6"
+          lg="6"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            img-url="/images/sold.png"
+            :title="actionSoldCardTitle"
+            :number="actionSold"
+          >
+            <div id="chart6" class="chart-container">
+              <Stacked100BarChart
+                v-if="loaded"
+                :sold="stagesSold"
+                :remaining="stagesNotSold"
+                :labels="['Продано', 'Остаток']"
+                :colors="['rgb(252, 53, 95)', 'rgb(242, 182, 195)']"
+                :title-text="actionSoldStackedBarChartTitle"
+              />
+            </div>
+          </ChartCard>
         </v-col>
-        <v-col cols="6">
-          <div id="chart7" class="chart-container"><StackedBarChart /></div>
+        <v-col
+          cols="6"
+          lg="6"
+          md="6"
+          sm="12"
+        >
+          <ChartCard
+            v-if="loaded"
+            img-url="/images/used.png"
+            :title="actionUsedCardTitle"
+            :number="actionUsed"
+          >
+            <div id="chart7" class="chart-container">
+              <Stacked100BarChart
+                v-if="loaded"
+                :sold="stagesUsed"
+                :remaining="stagesNotUsed"
+                :labels="['Использовано', 'Остаток']"
+                :colors="['rgb(252, 53, 95)', 'rgb(242, 182, 195)']"
+                :title-text="actionUsedStackedBarChartTitle"
+              />
+            </div>
+          </ChartCard>
         </v-col>
       </v-row>
     </v-container>
